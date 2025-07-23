@@ -68,7 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CollectionView\CollectionView.csproj">
-      <Project>{D5C93D88-A5D6-4843-935B-CC72F073B54E}</Project>
+      <Project>{DF5D5E11-BA1C-42B3-8CA3-49B793628FBE}</Project>
       <Name>CollectionView</Name>
     </ProjectReference>
   </ItemGroup>

@@ -69,7 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CollectionView\CollectionView.csproj">
-      <Project>{6E8E8AAC-E482-4E9C-9759-27B03E4DC309}</Project>
+      <Project>{DF5D5E11-BA1C-42B3-8CA3-49B793628FBE}</Project>
       <Name>CollectionView</Name>
     </ProjectReference>
   </ItemGroup>

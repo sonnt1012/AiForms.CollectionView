@@ -187,24 +187,21 @@ namespace AiForms.Renderers.iOS
 
             Performance.Start(out string reference);
 
-
+            var reusableCell = collectionView.DequeueReusableSupplementaryView(UICollectionElementKindSection.Header, CollectionViewRenderer.SectionHeaderId, indexPath) as ContentCellContainer;
             var cachingStrategy = CollectionView.CachingStrategy;
             if (cachingStrategy == ListViewCachingStrategy.RetainElement)
             {
-                nativeCell = GetNativeHeaderCell(realIndexPath);
+                
+                nativeCell = GetNativeHeaderCell(realIndexPath, reusableCell);
             }
             else if ((cachingStrategy & ListViewCachingStrategy.RecycleElement) != 0)
             {
                 // Here is used the argument indexPath as it is because header cell will be got not to displayed when IsInfinite.
-                nativeCell = collectionView.DequeueReusableSupplementaryView(
-                    UICollectionElementKindSection.Header,
-                    CollectionViewRenderer.SectionHeaderId,
-                    indexPath
-                ) as ContentCellContainer;
+                nativeCell = reusableCell;
 
                 if (nativeCell.ContentCell == null)
                 {
-                    nativeCell = GetNativeHeaderCell(realIndexPath);
+                    nativeCell = GetNativeHeaderCell(realIndexPath, reusableCell);
                 }
                 else
                 {
@@ -236,24 +233,24 @@ namespace AiForms.Renderers.iOS
 
             Performance.Start(out string reference);
 
+
+
+            // Note that UICollectionView returns the instance even if called in the first time, unlike UITableView.
+            
             var cachingStrategy = CollectionView.CachingStrategy;
+            cell = GetCellForPath(realIndexPath);
+            var id = cachingStrategy == ListViewCachingStrategy.RetainElement ? cell.GetType().FullName : TemplateIdForPath(realIndexPath).ToString();
+            var reusableCell = collectionView.DequeueReusableCell(id.ToString(), indexPath) as ContentCellContainer;
             if (cachingStrategy == ListViewCachingStrategy.RetainElement)
             {
-                cell = GetCellForPath(realIndexPath);
-                nativeCell = GetNativeCell(cell, realIndexPath);
+                nativeCell = GetNativeCell(cell, realIndexPath, reusableCell);
             }
             else if ((cachingStrategy & ListViewCachingStrategy.RecycleElement) != 0)
             {
-
-                var id = TemplateIdForPath(realIndexPath);
-
-
-                nativeCell = collectionView.DequeueReusableCell(id.ToString(), indexPath) as ContentCellContainer;
+                nativeCell = reusableCell;
                 if (nativeCell.ContentCell == null)
                 {
-                    cell = GetCellForPath(realIndexPath);
-
-                    nativeCell = GetNativeCell(cell, realIndexPath, true, id.ToString());
+                    nativeCell = GetNativeCell(cell, realIndexPath, reusableCell);
                 }
                 else
                 {
@@ -286,13 +283,11 @@ namespace AiForms.Renderers.iOS
             return indexPath;
         }
 
-        protected virtual ContentCellContainer GetNativeHeaderCell(NSIndexPath indexPath)
+        protected virtual ContentCellContainer GetNativeHeaderCell(NSIndexPath indexPath, ContentCellContainer reusableCell)
         {
             var cell = TemplatedItemsView.TemplatedItems[(int)indexPath.Section] as ContentCell;
 
             var renderer = (ContentCellRenderer)Xamarin.Forms.Internals.Registrar.Registered.GetHandlerForObject<IRegisterable>(cell);
-
-            var reusableCell = _uiCollectionView.DequeueReusableSupplementaryView(UICollectionElementKindSection.Header, CollectionViewRenderer.SectionHeaderId, indexPath) as ContentCellContainer;
 
             var nativeCell = renderer.GetCell(cell, reusableCell, _uiCollectionView) as ContentCellContainer;
 
@@ -310,14 +305,9 @@ namespace AiForms.Renderers.iOS
             return nativeCell;
         }
 
-        protected virtual ContentCellContainer GetNativeCell(ContentCell cell, NSIndexPath indexPath, bool recycleCells = false, string templateId = "")
+        protected virtual ContentCellContainer GetNativeCell(ContentCell cell, NSIndexPath indexPath, ContentCellContainer reusableCell)
         {
-            var id = recycleCells ? templateId : cell.GetType().FullName;
-
             var renderer = (ContentCellRenderer)Xamarin.Forms.Internals.Registrar.Registered.GetHandlerForObject<IRegisterable>(cell);
-
-            // Note that UICollectionView returns the instance even if called in the first time, unlike UITableView.
-            var reusableCell = _uiCollectionView.DequeueReusableCell(id, indexPath) as ContentCellContainer;
 
             var nativeCell = renderer.GetCell(cell, reusableCell, _uiCollectionView) as ContentCellContainer;
 
